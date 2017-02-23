@@ -74,7 +74,7 @@ window.setInterval(function(){
     var neededIron = $(buildingrow.children().get(3)).attr("data-cost");
     if(buildingToBuild != undefined){
       if((game_data.village.res[6] > neededWood && game_data.village.res[6] > neededStone && game_data.village.res[6] > neededIron) ||  buildingToBuild == "storage" || $("#buildqueue").find(".buildorder_storage").length > 0){
-        if(neededWood < game_data.village.wood && neededStone < game_data.village.stone && neededIron < game_data.village.iron){
+        if(neededWood < game_data.village.wood && neededStone < game_data.village.stone && neededIron < game_data.village.iron && $("[id*=buildorder_]").length < 4){
           var upgradlink = $("[id*=main_buildlink_" + buildingToBuild +"]");
           if(upgradlink != undefined){
             upgradlink.click();
