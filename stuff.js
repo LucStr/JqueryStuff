@@ -1,17 +1,19 @@
-/*
-stone of village = game_data.village.stone;
-wood of village = game_data.village.wood;
-iron of village = game_data.village.iron;
-Knackpunkte:
-- HG
-*/
-
+//Constants
 var postponedBuildings = [];
+var maxQueue = game_data.player.premium ? 4 : 1;
 
-function postponedBuild(building) {
-  var buildingrow = $("#main_buildrow_" + building);
-  var image = buildingrow.find("img").first();
-  var title = image.attr("title");
+function updateQueue() {
+  for (var i = 0; i < postponedBuildings.length; i++) {
+    var building = postponedBuildings[i];
+    var buildingrow = $("#main_buildrow_" + building);
+    var image = buildingrow.find("img").first();
+    var title = image.attr("title");
+
+    $("#preprodTable").find("tr").last().after('<tr><td class="lit-item"><img src="' + image.attr("src") + '" title="' + title +'" alt="" class="bmain_list_img">' + title + '<br>Stufe ' + getBuildingLevel(i) + '</td><td></td><td></td><td></td><td><button onclick=\'abortBuild("' + i + '")\'>Abbrechen</button></td></tr>');
+
+  }
+
+
 
 /*
   var now = new Date();
@@ -32,25 +34,26 @@ function postponedBuild(building) {
   console.log(neededTime);
 */
 
-  $("#preprodTable").find("tr").last().after('<tr><td class="lit-item"><img src="' + image.attr("src") + '" title="' + title +'" alt="" class="bmain_list_img">' + title + '<br>Stufe ' + getBuildingLevel(building) + '</td><td></td><td></td><td></td><td><button onclick=\'abortBuild("' + building + '")\'>Abbrechen</button></td></tr>');
-  postponedBuildings.push(building);
+  //postponedBuildings.push(building);
 }
 
-function abortBuild(building){
-  postponedBuildings.splice($.inArray(building, postponedBuildings),1);
+function addToQueue(building){
+  postponedBuildings.push(building);
   loadUI();
 }
 
-function getBuildingLevel(building){
-  var levelCount = $(".buildorder_" + building).length + parseInt(game_data.village.buildings[building]);
-  var filtered = $.grep(postponedBuildings, function(e, i){
-    return e == building
-  }, false );
-  return levelCount + filtered.length + 1;
+function abortBuild(id){
+  postponedBuildings.splice(id, 1);
+  loadUI();
 }
 
-function getBuildingsInProgressLevel(building){
-  return $(".buildorder_" + building).length + parseInt(game_data.village.buildings[building]) + 1;
+function getBuildingLevel(buildingId){
+  var building = postponedBuildings[buildingId];
+  var levelCount = $(".buildorder_" + building).length + parseInt(game_data.village.buildings[building]);
+  var filtered = $.grep(postponedBuildings, function(e, i){
+    return e == building && i < buildingId;
+  }, false );
+  return levelCount + filtered.length + 1;
 }
 
 function loadUI(){
@@ -59,17 +62,13 @@ function loadUI(){
   $("#buildings").find("tr").not(":eq(0)").each(function(){
     var building = $(this).children(".build_options").children("a").attr("data-building");
     if(building !== undefined){
-      $(this).children().last().after('<td class="buildingBot"><button onclick=\'postponedBuild("' + building + '")\'>upgrade</button></td>"')
+      $(this).children().last().after('<td class="buildingBot"><button onclick=\'addToQueue("' + building + '")\'>upgrade</button></td>"')
     } else{
       $(this).children().last().after('<td class="buildingBot">Voll ausgebaut</td>')
     }
   });
   $("#buildings").find("tr").first().children().last().after('<th class="buildingBot">Verschobener Bau</th>');
-  var oldPostponedBuildings = postponedBuildings;
-  postponedBuildings = [];
-  oldPostponedBuildings.forEach(function(e){
-    postponedBuild(e);
-  });
+  updateQueue();
 }
 
 window.setInterval(function(){
@@ -82,7 +81,7 @@ window.setInterval(function(){
     var neededIron = $(buildingrow.children().get(3)).attr("data-cost");
     if(buildingToBuild != undefined){
       if((game_data.village.res[6] > neededWood && game_data.village.res[6] > neededStone && game_data.village.res[6] > neededIron) ||  buildingToBuild == "storage" || $("#buildqueue").find(".buildorder_storage").length > 0){
-        if(neededWood < game_data.village.wood && neededStone < game_data.village.stone && neededIron < game_data.village.iron && $("[id*=buildorder_]").length < 4){
+        if(neededWood < game_data.village.wood && neededStone < game_data.village.stone && neededIron < game_data.village.iron && $("[id*=buildorder_]").length < maxQueue){
           var level = $(".buildorder_" + buildingToBuild).length + parseInt(game_data.village.buildings[buildingToBuild]) + 1;
           var upgradlink = $("#main_buildlink_" + buildingToBuild + "_" + level);
           if(upgradlink != undefined){
