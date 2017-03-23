@@ -152,3 +152,11 @@ var TWBot = {
 };
 
 TWBot.initialize();
+
+
+function getForecast(buildingName){
+	var building = BuildingMain.buildings[buildingName];
+    var costs = new Resources(building.wood, building.stone, building.iron)
+    var forecast = ResourcesForecaster.getForecast(costs, game_data.village, BuildingMain.res_schedule.rates, BuildingMain.res_schedule.amounts)
+	return new Date(forecast.when * 1000);
+}
