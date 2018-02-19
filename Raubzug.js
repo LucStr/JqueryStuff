@@ -4,7 +4,7 @@ function evaluateRaubzug(){
   if($("[name=botStarted]:checked").length != 1)
     return;
   var optionsContainer = $(".options-container").first()
-  var checkedLootingType = $("[name=lootingType]:checked").val();
+  var checkedLootingType = 2;//$("[name=lootingType]:checked").val();
   var smartSammler = $(optionsContainer.children()[checkedLootingType]).first()
   var lootingButton = smartSammler.find("a").first() //The Free Looting Button
   if(!lootingButton.hasClass("btn-disabled")){
