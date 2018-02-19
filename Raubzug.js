@@ -1,4 +1,4 @@
-window.setInterval(evaluateRaubzug, 1000)
+window.setInterval(evaluateRaubzug, 31478)
 
 function evaluateRaubzug(){
   if($("[name=botStarted]:checked").length != 1)
