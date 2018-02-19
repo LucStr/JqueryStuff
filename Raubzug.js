@@ -10,6 +10,7 @@ function evaluateRaubzug(){
   if(!lootingButton.hasClass("btn-disabled")){
     insertTroops(evaluateUnits());
     lootingButton.click();
+    reloadUILootingType(checkedLootingType);
   }
 }
 
@@ -61,6 +62,11 @@ function loadUILootingTypes(){
 
 function loadUIStartButton(){
   $(".candidate-squad-container").append('<b>Bot Started:</b> <input type="checkbox" name="botStarted" />')
+}
+
+function reloadUILootingType(type){
+  var actionContainer = $($(".action-container")[type])
+  actionContainer.append('<input type="radio" name="lootingType" value="' + type + '" checked>');
 }
 
 loadUI();
