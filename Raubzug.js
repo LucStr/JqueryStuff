@@ -26,7 +26,7 @@ function executeScavenge(lootingType){
   if(!lootingButton.hasClass("btn-disabled")){
     insertTroops(lootingType);
     console.log("attack");
-    //lootingButton.click();
+    lootingButton.click();
   }
 }
 
