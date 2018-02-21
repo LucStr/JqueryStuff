@@ -5,7 +5,7 @@
 - Zeit beachten für Besammlung
 */
 
-window.setInterval(evaluateRaubzug, 7000)
+window.setInterval(evaluateRaubzug, 31043)
 
 function evaluateRaubzug(){
   var activatedScavenges = $("[name^=startScavenge]:checked");
@@ -36,8 +36,9 @@ function insertTroops(lootingType){
     var inputToFill = $(inputsToFill[i]);
     var name = inputToFill.attr("name");
     var value = $("[name=troop" + lootingType + name + "]").val();
-    if(value == "a"){
-      value = inputToFill.parent().html().match(/\(([^)]+)\)/)[1];
+    var maxValue = inputToFill.parent().html().match(/\(([^)]+)\)/)[1]
+    if(value == "a" || value > maxValue){
+      value = maxValue;
     }
     inputToFill.val(value);
     inputToFill.change();
