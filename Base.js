@@ -1,151 +1,103 @@
 //Constants
-var ajaxToExecute = new Array();
-var localToServerDifference = Timing.getCurrentServerTime() - new Date();
-var server = "ch36.staemme.ch";
+var postponedBuildings = [];
+var maxQueue = game_data.player.premium ? 4 : 1;
 
-//AttackManager
-function sendAttack(villageId, time){
-  var form;
+function updateQueue() {
+  for (var i = 0; i < postponedBuildings.length; i++) {
+    var building = postponedBuildings[i];
+    var buildingrow = $("#main_buildrow_" + building);
+    var image = buildingrow.find("img").first();
+    var title = image.attr("title");
 
-  //Access Place
-  $.ajax({
-    url: "https://"+ server +"/game.php?village="+ villageId +"&screen=place",
-    type: "GET",
-    success: function(e){
-      form = $(e).find('#command-data-form');
-    },
-    async: false
-  });
+    $("#preprodTable").find("tr").last().after('<tr><td class="lit-item"><img src="' + image.attr("src") + '" title="' + title +'" alt="" class="bmain_list_img">' + title + '<br>Stufe ' + getBuildingLevel(i) + '</td><td></td><td></td><td></td><td><button onclick=\'abortBuild("' + i + '")\'>Abbrechen</button></td></tr>');
 
-  //Data Creation of serialized attack
-  var strange = form.find('> input[type="hidden"]:nth-child(1)');
-  var data = strange.attr("name") + "=" + strange.attr("value") + "&source_village=1332&spear=10&sword=0&axe=&archer=&spy=&light=&marcher=&heavy=&ram=&catapult=&knight=&snob=&x=537&y=518&target_type=coord&input=&attack=Agriffe";
-
-  //Don't get catched ;P
-  sleep(500);
-
-  //Load Confirm Page
-  $.ajax({
-    url: form.attr("action"),
-    type: form.attr("method"),
-    data: data,
-    success: function(e){
-      form = $(e).find('#command-data-form')
-    },
-    async: false
-  });
-
-  //Create Data to Confirm Attack
-  var ajaxData = {
-    url: form.attr("action"),
-    type: form.attr("method"),
-    data: form.serialize(),
-    async: false
-  };
-
-  //Put it to Global Store of Ajax requests
-  ajaxToExecute.push({time, ajaxData});
-}
-
-//Time
-function getServerTime(){
-  return new Date(new Date().getTime() + localToServerDifference);
-}
-
-function milisecondsUntil(date){
-  var now = getServerTime();
-  var millisUntil = date.getTime() - now.getTime();
-  return millisUntil;
-}
-
-function sleep(miliseconds) {
-   var currentTime = new Date().getTime();
-   while (currentTime + miliseconds >= new Date().getTime()) {
-   }
- }
-
- setInterval(function(){
-   handle();
-}, 5000);
-
-
-//Handler
-function handle(){
-  ajaxSoonToBeExecutet = ajaxToExecute.filter(function(i){
-    return new Date()  - i.time < 10000
-  });
-
-  for (var i = 0; i < ajaxSoonToBeExecutet.length; i++) {
-    var miliSecondsUntil = milisecondsUntil(ajaxSoonToBeExecutet[i].time);
-    (function(e){
-      setTimeout(function(){
-        $.ajax(e);
-      }, miliSecondsUntil);
-    })(ajaxSoonToBeExecutet[i].ajaxData);
-    ajaxToExecute.splice(ajaxSoonToBeExecutet[i]);
   }
-}
-
-//Initializing UI For User
-function initialize(){
-  //Clear Area
-  $("#questlog").html("");
-  $("#header_info").html("");
-  $("#topContainer").html("");
-  $("#quickbar_outer").html("");
-  $("#content_value").html("");
-
-  //title
-  $("#content_value").append("<h1>Lucas Mansion :D</h1>");
-
-  //Welcome Text
-  $("#content_value").append("<p>Bitte nicht erschrecken, dieses UI ist für dich, um dir Stämme zu erleichtern alle Grundfunktionen "
-    + "wurden entfernt, damit auch nichts schlimmes passieren kann. Wenn du die Seite neu lädst(F5) sind alle deine Einstellungen weg. "
-    + "Ich wünsche dir viel Spass :)</p>");
-
-  //mainbuilding
-  $("#content_value").append("<div id='mainbuilding'></div>");
-
-  $.ajax({
-    type: "GET",
-    url: "/game.php?screen=main",
-    success: function(e){
-      $("#mainbuilding").append($(e).find("#content_value").html());
-    }
-  });
-  sleep(500);
-
-  //modifiedPlace
-  $("#content_value").append("<div id='modifiedPlace'></div>");
-
-  $.ajax({
-    type: "GET",
-    url: "/game.php?screen=place",
-    success: function(e){
-      $("#modifiedPlace").append($(e).find("#content_value").html());
-    }
-  });
-  sleep(500);
 
 
 
-
-  //neu laden verhindern
-  window.onbeforeunload = function (e) {
-    return 'Bist du dir Sicher? Dein ganzer Spielstand geht verloren.';
-  };
-}
-
-//Testing
-
-//Attack
 /*
-var now = new Date(Timing.getCurrentServerTime());
-var timeToSend = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds() + 15, 0);
-console.log(timeToSend.toJSON());
-
-sendAttack(1332, timeToSend);
+  var now = new Date();
+  var neededTime = new Date();
+  var neededWood = buildingrow.children(".cost_wood").attr("data-cost") - game_data.village.wood;
+  var neededWoodTime = neededTime.setSeconds(now.getSeconds() + neededWood / game_data.village.wood_prod);
+  var neededTime =  neededWood > 0 ? neededWoodTime : neededTime;
+  console.log(neededTime);
+  var neededStone = buildingrow.children(".cost_stone").attr("data-cost") - game_data.village.stone;
+  console.log(neededStone);
+  var neededStoneTime = neededTime.setSeconds(now.getSeconds() + neededStone / game_data.village.stone_prod);
+  console.log(neededStoneTime);
+  var neededTime =  neededStone > 0  && neededStoneTime > neededTime ? neededStoneTime : neededTime;
+  console.log(neededTime);
+  var neededIron = buildingrow.children(".cost_stone").attr("data-cost") - game_data.village.iron;
+  var neededIronTime = neededTime.setSeconds(now.getSeconds() + neededStone / game_data.village.iron_prod);
+  var neededTime =  neededStone > 0  && neededIronTime > neededTime ? neededIronTime : neededTime;
+  console.log(neededTime);
 */
 
-//UI
-initialize();
+  //postponedBuildings.push(building);
+}
+
+function addToQueue(building){
+  postponedBuildings.push(building);
+  loadUI();
+}
+
+function abortBuild(id){
+  postponedBuildings.splice(id, 1);
+  loadUI();
+}
+
+function getBuildingLevel(buildingId){
+  var building = postponedBuildings[buildingId];
+  var levelCount = $(".buildorder_" + building).length + parseInt(game_data.village.buildings[building]);
+  var filtered = $.grep(postponedBuildings, function(e, i){
+    return e == building && i < buildingId;
+  }, false );
+  return levelCount + filtered.length + 1;
+}
+
+function loadUI(){
+  $(".buildingBot").remove();
+  $("#content_value").find("table").first().after('<div class="buildingBot" id="preprod"><h1>Warte-Warteschlange</h1><table class="vis" id="preprodTable" style="width: 100%"><tbody><tr><th style="width: 23%">Bou</th><th>Dur</th><th>Vorussichtliche Uftrag</th><th>Fertigstellig</th><th style="width: 15%">Abbruch</th><th style="background:none !important;"></th></tr></tbody></table></div>')
+  $("#buildings").find("tr").not(":eq(0)").each(function(){
+    var building = $(this).children(".build_options").children("a").attr("data-building");
+    if(building !== undefined){
+      $(this).children().last().after('<td class="buildingBot"><a class="btn" href=\'javascript:addToQueue("' + building + '")\'>upgrade</button></td>"')
+    } else{
+      $(this).children().last().after('<td class="buildingBot">Voll ausgebaut</td>')
+    }
+  });
+  $("#buildings").find("tr").first().children().last().after('<th class="buildingBot">Verschobener Bau</th>');
+  updateQueue();
+}
+
+window.setInterval(function(){
+  console.log("entered");
+  var buildingToBuild = postponedBuildings[0];
+  var buildingrow = $("#main_buildrow_" + buildingToBuild);
+  if(game_data.village.res[8] - game_data.village.res[7] - game_data.village.res[8] / 10 > 0 || buildingToBuild == "farm" || $("#buildqueue").find(".buildorder_farm").length > 0){
+    var neededWood = $(buildingrow.children().get(1)).attr("data-cost");
+    var neededStone = $(buildingrow.children().get(2)).attr("data-cost");
+    var neededIron = $(buildingrow.children().get(3)).attr("data-cost");
+    if(buildingToBuild != undefined){
+      if((game_data.village.res[6] > neededWood && game_data.village.res[6] > neededStone && game_data.village.res[6] > neededIron) ||  buildingToBuild == "storage" || $("#buildqueue").find(".buildorder_storage").length > 0){
+        if(neededWood < game_data.village.wood && neededStone < game_data.village.stone && neededIron < game_data.village.iron && $("[id*=buildorder_]").length < maxQueue){
+          var level = $(".buildorder_" + buildingToBuild).length + parseInt(game_data.village.buildings[buildingToBuild]) + 1;
+          var upgradlink = $("#main_buildlink_" + buildingToBuild + "_" + level);
+          if(upgradlink != undefined){
+            upgradlink.click();
+            postponedBuildings.splice($.inArray(buildingToBuild, postponedBuildings),1);
+          }
+        }
+      } else {
+        console.log("unshift storage");
+        postponedBuildings.unshift("storage");
+      }
+    }
+  } else{
+    postponedBuildings.unshift("farm");
+  }
+  loadUI();
+}, 5000);
+
+loadUI();
