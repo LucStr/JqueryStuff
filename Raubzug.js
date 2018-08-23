@@ -22,7 +22,7 @@ function executeScavenge(lootingType){
     return;
   var optionsContainer = $(".options-container").first()
   var smartSammler = $(optionsContainer.children()[lootingType]).first()
-  var lootingButton = smartSammler.find("a").first() //The Free Looting Button
+  var lootingButton = smartSammler.find("a.btn").first() //The Free Looting Button
   if(!lootingButton.hasClass("btn-disabled")){
     insertTroops(lootingType);
     console.log("attack");
