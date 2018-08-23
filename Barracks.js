@@ -50,7 +50,7 @@ function getUnitPicture(unit){
 }
 
 function getMaxProducableUnits(unit){
-  return $("#" + unit + "_0_a").text().match(/\(([^)]+)\)/)[1]
+  return Number($("#" + unit + "_0_a").text().match(/\(([^)]+)\)/)[1])
 }
 
 function loadUI(){
