@@ -1,6 +1,6 @@
 //Constants
 var postponedBuildings = [];
-var maxQueue = game_data.player.premium ? 4 : 1;
+var maxQueue = game_data.features.Premium.active ? 4 : 1;
 
 function updateQueue() {
   for (var i = 0; i < postponedBuildings.length; i++) {
