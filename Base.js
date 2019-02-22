@@ -75,12 +75,12 @@ window.setInterval(function(){
   console.log("entered");
   var buildingToBuild = postponedBuildings[0];
   var buildingrow = $("#main_buildrow_" + buildingToBuild);
-  if(game_data.village.res[8] - game_data.village.res[7] - game_data.village.res[8] / 10 > 0 || buildingToBuild == "farm" || $("#buildqueue").find(".buildorder_farm").length > 0){
+  if(game_data.village.pop_max - game_data.village.pop - game_data.village.pop_max / 10 > 0 || buildingToBuild == "farm" || $("#buildqueue").find(".buildorder_farm").length > 0){
     var neededWood = $(buildingrow.children().get(1)).attr("data-cost");
     var neededStone = $(buildingrow.children().get(2)).attr("data-cost");
     var neededIron = $(buildingrow.children().get(3)).attr("data-cost");
     if(buildingToBuild != undefined){
-      if((game_data.village.res[6] > neededWood && game_data.village.res[6] > neededStone && game_data.village.res[6] > neededIron) ||  buildingToBuild == "storage" || $("#buildqueue").find(".buildorder_storage").length > 0){
+      if((game_data.village.storage_max > neededWood && game_data.village.storage_max > neededStone && game_data.village.storage_max > neededIron) ||  buildingToBuild == "storage" || $("#buildqueue").find(".buildorder_storage").length > 0){
         if(neededWood < game_data.village.wood && neededStone < game_data.village.stone && neededIron < game_data.village.iron && $("[id*=buildorder_]").length < maxQueue){
           var level = $(".buildorder_" + buildingToBuild).length + parseInt(game_data.village.buildings[buildingToBuild]) + 1;
           var upgradlink = $("#main_buildlink_" + buildingToBuild + "_" + level);
